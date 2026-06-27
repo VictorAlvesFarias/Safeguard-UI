@@ -1,15 +1,15 @@
 import React, { useContext, useEffect, useState } from 'react'
-import ModalClose from '../../base-components/modal-close'
+import { ModalClose } from 'react-base-components'
 import Button from '../../components/button'
 import { fileService } from '../../services/files-service'
 import { useQuery } from '../../utils/hooks/query-hooks'
 import { FileEntity } from '../../interfaces/entities/file-entity'
-import { ModalContextObject } from '../../base-components/modal-context'
+import { ModalContextObject } from 'react-base-components'
 import { Plus, TrashIcon } from 'lucide-react'
 import CardLoading from '../../pages/helpers/loading/card-loading'
 import { base64ToImage } from '../../utils/extensions/image'
 import Loading from '../../components/loading'
-import If from '../../base-components/if'
+import { If } from 'react-base-components'
 
 function FilesManagerDialog({ callback }: { callback: (e: FileEntity) => any }) {
   const [finished, setQuery] = useQuery();
@@ -86,9 +86,9 @@ function FilesManagerDialog({ callback }: { callback: (e: FileEntity) => any }) 
         </div>
       </div>
       <div className='flex gap-3 max-w-80 flex-1 justify-end flex-col'>
-          <div className='w-1/2'>
-            <Button disabled={selected == null} onClick={handleSelectItem}>Selecionar</Button>
-          </div>
+        <div className='w-1/2'>
+          <Button disabled={selected == null} onClick={handleSelectItem}>Selecionar</Button>
+        </div>
         <ModalClose className='w-9 h-9 absolute top-0 right-0 m-3'>
           <Button variation='red'>X</Button>
         </ModalClose>

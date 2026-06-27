@@ -1,10 +1,10 @@
 import React from "react"
-import CheckboxContainer, { ICheckboxContainerProps } from '../base-components/checkbox'
-import { componentSelector } from "../utils/helpers/component-selector"
+import { CheckboxContainer, ICheckboxContainerProps } from 'react-base-components'
+import { componentSelector } from "react-component-selector"
 
 
 const checkboxVariations = {
-    default: (props: ICheckboxContainerProps, ref) =>
+    default: (props: ICheckboxContainerProps, ref: any) =>
         <CheckboxContainer
             {...props}
             ref={ref}

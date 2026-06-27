@@ -1,4 +1,5 @@
 import './App.css';
+import "react-base-components/styles.css";
 import Login from './pages/shared/login/login';
 import Signup from './pages/shared/signup/signup';
 import UserRouter from './routes/user-router';

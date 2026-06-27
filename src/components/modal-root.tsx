@@ -1,6 +1,6 @@
 import React from "react"
-import ModalRootContainer, { IModalRootContainerProps } from "../base-components/modal-root"
-import { componentSelector } from "../utils/helpers/component-selector"
+import { ModalRootContainer, IModalRootContainerProps } from "react-base-components"
+import { componentSelector } from "react-component-selector"
 
 const modalRootVariations = {
     default: (props: IModalRootContainerProps) =>

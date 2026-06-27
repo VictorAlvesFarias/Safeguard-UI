@@ -4,10 +4,10 @@ import React, { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { z } from 'zod';
-import If from '../../../base-components/if';
-import ModalContext from '../../../base-components/modal-context';
-import ModalOpen from '../../../base-components/modal-open';
-import ModalRoot from '../../../base-components/modal-root';
+import { If } from 'react-base-components';
+import { ModalContext } from 'react-base-components';
+import { ModalOpen } from 'react-base-components';
+import { ModalRootContainer } from 'react-base-components';
 import Button from '../../../components/button';
 import Content from "../../../components/content";
 import Form from '../../../components/form';
@@ -49,19 +49,19 @@ function PlatformsManeger() {
         setValue('imageId', String(file.id), { shouldValidate: true })
         setCurrentImage(base64ToImage(file.storedFile.base64, file.storedFile.mimeType))
     }
-    function handleAddPlatform(data) {
+    function handleAddPlatform(data: any) {
         return platformService.add(toFormData(data))
             .then(r => {
                 navigate(back)
             })
     }
-    function handleUpdatePlatform(data) {
+    function handleUpdatePlatform(data: any) {
         return platformService.update(toFormData(data), urlParams.id)
             .then(() => {
                 setIsEditing(false)
             })
     }
-    function handleAddOrUpdate(data) {
+    function handleAddOrUpdate(data: any) {
         if (isEditable) {
             setQuery(() => handleUpdatePlatform(data))
         }
@@ -106,9 +106,9 @@ function PlatformsManeger() {
                         <Span variation='error'>{errors.imageId?.message}</Span>
                         <If conditional={isEditing || isEditable == false}>
                             <ModalContext>
-                                <ModalRoot>
+                                <ModalRootContainer>
                                     <FilesManagerDialog callback={handleSelectImage} />
-                                </ModalRoot>
+                                </ModalRootContainer>
                                 <ModalOpen className='cursor-pointer mt-3 bg-white bg-opacity-5 border-2 border-zinc-400 p-1.5 px-3 rounded-full'>
                                     Select
                                 </ModalOpen>

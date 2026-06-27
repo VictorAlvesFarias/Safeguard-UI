@@ -1,7 +1,7 @@
 
 import React from "react"
 import Loading from "./loading"
-import If from "../../../base-components/if"
+import { If } from 'react-base-components'
 
 interface LoadingPageProps {
   loading: boolean

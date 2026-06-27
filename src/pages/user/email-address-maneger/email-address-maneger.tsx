@@ -14,8 +14,8 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { providerService } from '../../../services/provider-service';
 import { emailAddressService } from '../../../services/email-address-service';
-import If from '../../../base-components/if';
-import DropdownContext from '../../../base-components/dropdown-context';
+import { If } from 'react-base-components';
+import { DropdownContext } from 'react-base-components';
 import DropdownRoot from '../../../components/dropdown-root';
 import DropdownMenu from '../../../components/dropdown-menu';
 import DropdownOption from '../../../components/dropdown-option'

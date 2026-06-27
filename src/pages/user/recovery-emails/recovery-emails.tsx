@@ -17,7 +17,7 @@ import InputText from '../../../components/input-text';
 import Button from '../../../components/button';
 import InputRoot from '../../../components/input-root';
 import Label from '../../../components/label';
-import DropdownContext from '../../../base-components/dropdown-context';
+import { DropdownContext } from 'react-base-components';
 import DropdownRoot from '../../../components/dropdown-root';
 import DropdownMenu from '../../../components/dropdown-menu';
 import DropdownOption from '../../../components/dropdown-option';

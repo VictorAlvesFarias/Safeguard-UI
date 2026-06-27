@@ -13,14 +13,14 @@ import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { providerService } from '../../../services/provider-service';
-import If from '../../../base-components/if';
+import { If } from 'react-base-components';
 import { objectToFormData } from '../../../utils/extensions/formData';
 import { base64ToImage } from '../../../utils/extensions/image';
 import { toFormData } from 'axios';
-import ModalContext from '../../../base-components/modal-context';
+import { ModalContext } from 'react-base-components';
 import ModalRoot from '../../../components/modal-root';
 import FilesManagerDialog from '../../../dialogs/files-manager-dialog/files-manager-dialog';
-import ModalOpen from '../../../base-components/modal-open';
+import { ModalOpen } from 'react-base-components';
 import { FileEntity } from '../../../interfaces/entities/file-entity';
 import { ChevronLeft } from 'lucide-react';
 

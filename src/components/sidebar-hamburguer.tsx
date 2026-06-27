@@ -1,6 +1,6 @@
 import React from "react"
-import SidebarHamburguerContainer, { SidebarHamburguerContainerProps } from '../base-components/sidebar-hamburguer'
-import { componentSelector } from "../utils/helpers/component-selector"
+import { SidebarHamburguerContainer, SidebarHamburguerContainerProps } from 'react-base-components'
+import { componentSelector } from "react-component-selector"
 
 const hamburguerVariations = {
     default: (props: SidebarHamburguerContainerProps) =>

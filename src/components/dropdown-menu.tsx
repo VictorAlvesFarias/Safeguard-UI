@@ -1,6 +1,6 @@
 import React from "react"
-import { componentSelector } from "../utils/helpers/component-selector"
-import DropdownMenuContainer, { IDropdownMenuContainerProps } from '../base-components/dropdown-menu'
+import { componentSelector } from "react-component-selector"
+import { IDropdownMenuContainerProps, DropdownMenuContainer } from 'react-base-components'
 
 const dropdownMenuVariations = {
     default: (props: IDropdownMenuContainerProps) =>

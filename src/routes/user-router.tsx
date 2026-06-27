@@ -8,19 +8,19 @@ import SidebarMenu from "../components/sidebar-menu";
 import SidebarItem from "../components/sidebar-item";
 import SidebarContent from "../components/sidebar-content";
 import SidebarHamburguer from "../components/sidebar-hamburguer";
-import If from "../base-components/if";
+import { If } from 'react-base-components';
 import AccordionTitle from "../components/accordion-title";
 import Accordion from "../components/accordion";
 import AccordionRoot from "../components/accordion-root";
 import { useAppSelector } from "../utils/hooks/redux-hooks";
 import Cookies from 'js-cookie';
-import SidebarContext from "../base-components/sidebar-context";
+import { SidebarContext } from 'react-base-components';
 import { USER_ROUTES } from "../config/routes-config";
-import AccordionContext from "../base-components/accordion-context";
-import ModalContext from '../base-components/modal-context'
+import { AccordionContext } from 'react-base-components';
+import { ModalContext } from 'react-base-components'
 import ModalRoot from '../components/modal-root'
-import ModalOpen from '../base-components/modal-open'
-import ModalClose from '../base-components/modal-close'
+import { ModalOpen } from 'react-base-components'
+import { ModalClose } from 'react-base-components'
 import Button from '../components/button'
 import Providers from "../pages/user/providers/providers";
 import Platforms from "../pages/user/platforms/platforms";
@@ -45,7 +45,10 @@ function UserRouters() {
       <SidebarContext>
         <SidebarRoot>
           <SidebarMenu>
-            <SidebarItem href={USER_ROUTES.PROFILE}>
+            <SidebarItem redirect={() => {
+              navigate(USER_ROUTES.PROFILE)
+              return USER_ROUTES.PROFILE
+            }}>
               <div className="flex gap-3 items-start flex-col">
                 <div className="flex gap-3 items-center">
                   <CircleUser className="w-7 h-7"></CircleUser>
@@ -57,17 +60,29 @@ function UserRouters() {
                 </div>
               </div>
             </SidebarItem>
-            <SidebarItem href={USER_ROUTES.EMAILS}>
-              <SidebarHref><MailsIcon />E-mails</SidebarHref>
+            <SidebarItem redirect={() => {
+              navigate(USER_ROUTES.EMAILS)
+              return USER_ROUTES.EMAILS
+            }}>
+              <SidebarHref>E-mails</SidebarHref>
             </SidebarItem>
-            <SidebarItem href={USER_ROUTES.EMAIL_ADDRESS}>
-              <SidebarHref><MailIcon />Addresses</SidebarHref>
+            <SidebarItem redirect={() => {
+              navigate(USER_ROUTES.EMAIL_ADDRESS)
+              return USER_ROUTES.EMAIL_ADDRESS
+            }}>
+              <SidebarHref>Addresses</SidebarHref>
             </SidebarItem>
-            <SidebarItem href={USER_ROUTES.DOMAINS}>
-              <SidebarHref><AtSignIcon /> Providers</SidebarHref>
+            <SidebarItem redirect={() => {
+              navigate(USER_ROUTES.DOMAINS)
+              return USER_ROUTES.DOMAINS
+            }}>
+              <SidebarHref> Providers</SidebarHref>
             </SidebarItem>
-            <SidebarItem href={USER_ROUTES.PLATFORMS}>
-              <SidebarHref><NetworkIcon />Platforms</SidebarHref>
+            <SidebarItem redirect={() => {
+              navigate(USER_ROUTES.PLATFORMS)
+              return USER_ROUTES.PLATFORMS
+            }}>
+              <SidebarHref>Platforms</SidebarHref>
             </SidebarItem>
             <ModalContext>
               <div className="flex-1 flex items-end w-full">

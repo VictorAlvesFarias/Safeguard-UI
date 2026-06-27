@@ -1,6 +1,6 @@
 import React from "react"
-import { componentSelector } from "../utils/helpers/component-selector"
-import { IContentContainer } from "../base-components/content"
+import { componentSelector } from "react-component-selector"
+import { IContentContainer } from "react-base-components"
 
 const ContentVariations = {
   default: (props: IContentContainer) =>

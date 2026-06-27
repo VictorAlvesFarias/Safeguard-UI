@@ -13,8 +13,8 @@ import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { emailService } from '../../../services/emails-service';
-import If from '../../../base-components/if';
-import DropdownContext from '../../../base-components/dropdown-context';
+import { If } from 'react-base-components';
+import { DropdownContext } from 'react-base-components';
 import DropdownRoot from '../../../components/dropdown-root';
 import DropdownMenu from '../../../components/dropdown-menu';
 import DropdownOption from '../../../components/dropdown-option';
@@ -28,10 +28,10 @@ import { PlatformEntity } from '../../../interfaces/entities/platform-entity';
 import { EmailEntity } from '../../../interfaces/entities/email-entity';
 import { platformService } from '../../../services/platforms-service';
 import { emailAddressService } from '../../../services/email-address-service';
-import Accordion from '../../../base-components/accordion';
+import { AccordionContainer } from 'react-base-components';
 import AccordionRoot from '../../../components/accordion-root';
 import AccordionTitle from '../../../components/accordion-title';
-import AccordionContext from '../../../base-components/accordion-context';
+import { AccordionContext } from 'react-base-components';
 import { USER_ROUTES } from '../../../config/routes-config';
 
 function EmailsManeger() {
@@ -206,7 +206,7 @@ function EmailsManeger() {
                                                 </div>
                                             </div>
                                         </AccordionTitle>
-                                        <Accordion className='w-full'>
+                                        <AccordionContainer className='w-full'>
                                             <Link
                                                 className='bg-black p-3 bg-opacity-30 cursor-pointer hover:text-violet-500 transition font-semibold'
                                                 to={`${USER_ROUTES.RECOVERY_KEYS}?id=${urlParams.id}`}
@@ -240,7 +240,7 @@ function EmailsManeger() {
                                             >
                                                 Files
                                             </Link>
-                                        </Accordion>
+                                        </AccordionContainer>
                                     </AccordionRoot>
                                 </AccordionContext>
                             </If>
