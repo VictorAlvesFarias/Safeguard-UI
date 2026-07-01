@@ -33,6 +33,7 @@ import RecoveryEmails from "../pages/user/recovery-emails/recovery-emails";
 import EmailAddressManeger from "../pages/user/email-address-maneger/email-address-maneger";
 import EmailAddresses from "../pages/user/email-address/email-address";
 import EmailFile from "../pages/user/email-files/email-files";
+import Pipeline from "../pages/user/pipeline/pipeline";
 
 function UserRouters() {
   const { logout, isAuthenticated } = useContext(AuthContext);
@@ -125,6 +126,7 @@ function UserRouters() {
               <Route path={USER_ROUTES.RECOVERY_KEYS} element={<RecoveryKeys />} />
               <Route path={USER_ROUTES.RECOVERY_EMAILS} element={<RecoveryEmails />} />
               <Route path={USER_ROUTES.EMAIL_FILES} element={<EmailFile />} />
+              <Route path={USER_ROUTES.PIPELINE} element={<Pipeline />} />
             </Routes>
           </SidebarContent>
         </SidebarRoot>

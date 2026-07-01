@@ -3,7 +3,7 @@ import { componentSelector } from "react-component-selector"
 
 const AccordionRootVariations = {
     default: (props: React.HTMLAttributes<HTMLDivElement>) =>
-        <div {...props} className='flex-col flex ' />,
+        <div {...props} className='flex-col flex w-full items-center' />,
     full: (props: React.HTMLAttributes<HTMLDivElement>) =>
         <div {...props} className='flex-col flex w-full' />
 }

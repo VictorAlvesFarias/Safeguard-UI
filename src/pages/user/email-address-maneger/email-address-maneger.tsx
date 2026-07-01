@@ -15,13 +15,16 @@ import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { providerService } from '../../../services/provider-service';
 import { emailAddressService } from '../../../services/email-address-service';
 import { If } from 'react-base-components';
-import { DropdownContext } from 'react-base-components';
+import { SelectContext } from 'react-base-components';
 import DropdownRoot from '../../../components/dropdown-root';
 import DropdownMenu from '../../../components/dropdown-menu';
 import DropdownOption from '../../../components/dropdown-option'
 import { ProviderEntity } from '../../../interfaces/entities/provider-entity';
 import { base64ToImage } from '../../../utils/extensions/image';
 import { ChevronLeft } from 'lucide-react';
+import { useAppDispatch, useAppSelector } from '../../../utils/hooks/redux-hooks';
+import { setPipelineData } from '../../../slices/pipeline-slice';
+import { USER_ROUTES } from '../../../config/routes-config';
 
 function EmailAddressManeger() {
     const [finished, setQuery, setFinished] = useQuery(false)
@@ -31,15 +34,19 @@ function EmailAddressManeger() {
     const [providers, setProviders] = useState<ProviderEntity[]>([])
     const back: any = -1
     const navigate = useNavigate()
+    const dispatch = useAppDispatch()
+    const pipeline = useAppSelector(state => state.pipeline.value)
     const [searchParams, setSearchParams] = useSearchParams()
 
     const urlParams = {
         id: searchParams.get("id")
     }
+
     const schema = z.object({
         username: z.string().nonempty('Required'),
         providerId: z.number().nonnegative('Required'),
     })
+
     const { register, handleSubmit, formState: { errors }, setValue, reset, control, watch } = useForm<z.infer<typeof schema>>(
         {
             resolver: zodResolver(schema),
@@ -51,9 +58,15 @@ function EmailAddressManeger() {
             ...data
         })
             .then(r => {
-                navigate(back)
+                if (pipeline.isActive) {
+                    dispatch(setPipelineData({ emailAddressId: r.data?.id || r.data }))
+                    navigate(USER_ROUTES.PIPELINE)
+                } else {
+                    navigate(back)
+                }
             })
     }
+
     function handleUpdateEmailAdddress(data) {
         return emailAddressService.update({
             ...data
@@ -62,6 +75,7 @@ function EmailAddressManeger() {
                 setIsEditing(false)
             })
     }
+
     function handleAddOrUpdate(data) {
         if (isEditable) {
             setQuery(() => handleUpdateEmailAdddress(data))
@@ -70,6 +84,7 @@ function EmailAddressManeger() {
             setQuery(() => handleAddEmailAdddress(data))
         }
     }
+
     function handleGetEmailAdddress() {
         return emailAddressService.getById({ id: urlParams.id })
             .then(({ res }) => {
@@ -81,6 +96,7 @@ function EmailAddressManeger() {
                 setCurrentImage(base64ToImage(res.provider.image.storedFile.base64, res.provider.image.storedFile.mimeType))
             })
     }
+
     function handleGetProviders() {
         return providerService.getAll().then(({ res }) => {
             setProviders(res)
@@ -95,16 +111,23 @@ function EmailAddressManeger() {
             ])
         }
         else {
+            if (pipeline.isActive && pipeline.address) {
+                setValue('username', pipeline.address)
+            }
+            if (pipeline.isActive && pipeline.providerId) {
+                setValue('providerId', pipeline.providerId)
+            }
             setFinished(true)
             setIsEditing(true)
             setQuery([
                 () => handleGetProviders(),
             ])
         }
-    }, [])
+    }, [pipeline.isActive, pipeline.address, pipeline.providerId])
 
     useEffect(() => {
         const image = providers.filter(e => e.id == watch("providerId"))[0]?.image
+
         setCurrentImage(base64ToImage(image?.storedFile.base64, image?.storedFile.mimeType))
     }, [watch("providerId")])
 
@@ -112,18 +135,18 @@ function EmailAddressManeger() {
         <Content >
             <div className='bg-fort w-full h-full overflow-auto relative transition-all bg-gradient-to-t from-main-black-800 to-transparent duration-500   bg-main-violet-900'>
                 <div className='flex w-full gap-3 items-center p-6'>
-                    <Link className='cursor-pointer  bg-white bg-opacity-5 hover:bg-opacity-15 w-10 h-10 flex items-center justify-center border-2 border-zinc-400 rounded-full top-0 left-0 ' to={back}>
+                    <Link className='cursor-pointer  bg-white bg-opacity-5 hover:bg-opacity-15 w-10 h-10 flex items-center justify-center border-2 border-zinc-400 rounded-full top-0 left-0 ' to={pipeline.isActive ? USER_ROUTES.PIPELINE : back}>
                         <ChevronLeft />
                     </Link>
                     <h1 className='font-bold font- text-white text-3xl font-sans '>{urlParams.id ? "Address" : "New Address"}</h1>
                 </div>
                 <Loading loading={!finished} />
                 <If conditional={finished}>
-                    <div className='flex gap-3 w-full  my-28 rounded items-center justify-center  flex-col p-3  center '>
+                    <div className='flex gap-6 w-full  my-28 rounded items-center justify-center  flex-col p-3  center '>
                         <div className='w-48 h-48 bg-tertiary rounded center relative'>
                             {currentImage && <img className='w-16 min-h-16 ' src={currentImage}></img>}
                         </div>
-                        <div className=' w-full flex-1 rounded center max-w-96 flex-col'>
+                        <div className=' w-full flex-1 rounded center max-w-3xl flex-col'>
                             <Form variation='card' onSubmit={handleSubmit((e) => handleAddOrUpdate(e))} >
                                 <InputRoot>
                                     <Label >Username</Label>
@@ -137,7 +160,7 @@ function EmailAddressManeger() {
                                         control={control}
                                         render={({ field, field: { onChange } }) => {
                                             return (
-                                                <DropdownContext onChange={onChange}>
+                                                <SelectContext onChange={onChange}>
                                                     <DropdownRoot {...field} disabled={!isEditing} placeholder='Provider'>
                                                         <DropdownMenu>
                                                             {providers.map((e, i) =>
@@ -145,22 +168,23 @@ function EmailAddressManeger() {
                                                             )}
                                                         </DropdownMenu>
                                                     </DropdownRoot>
-                                                </DropdownContext>
+                                                </SelectContext>
                                             )
                                         }}
                                     />
                                     <Span variation='error'>{errors.providerId?.message}</Span>
                                 </InputRoot>
-                                <If conditional={!isEditable}>
-                                    <Button>Add</Button>
-                                </If>
-                                <If conditional={isEditable}>
-                                    {
-                                        isEditing ?
-                                            <Button>Save</Button> :
-                                            <Span onClick={() => setIsEditing(true)} variation='button-default-full'>Edit</Span>
+                                <div className='flex w-full center mt-3'>
+                                    {isEditing &&
+                                        <Button> Save</Button>
                                     }
-                                </If>
+                                    {!isEditable &&
+                                        <Button>Add</Button>
+                                    }
+                                    {!isEditing && isEditable &&
+                                        <Button onClick={() => setIsEditing(true)}>Edit</Button>
+                                    }
+                                </div>
                             </Form>
                         </div>
                     </div>

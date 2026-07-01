@@ -6,7 +6,6 @@ import InputText from '../../../components/input-text';
 import Form from '../../../components/form';
 import Button from '../../../components/button';
 import InputRoot from '../../../components/input-root';
-import Span from '../../../components/span';
 import Label from '../../../components/label';
 import { Controller, useForm } from 'react-hook-form';
 import { z } from 'zod';
@@ -14,7 +13,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { emailService } from '../../../services/emails-service';
 import { If } from 'react-base-components';
-import { DropdownContext } from 'react-base-components';
+import { SelectContext } from 'react-base-components';
 import DropdownRoot from '../../../components/dropdown-root';
 import DropdownMenu from '../../../components/dropdown-menu';
 import DropdownOption from '../../../components/dropdown-option';
@@ -33,6 +32,10 @@ import AccordionRoot from '../../../components/accordion-root';
 import AccordionTitle from '../../../components/accordion-title';
 import { AccordionContext } from 'react-base-components';
 import { USER_ROUTES } from '../../../config/routes-config';
+import { useAppDispatch, useAppSelector } from '../../../utils/hooks/redux-hooks';
+import { setPipelineData } from '../../../slices/pipeline-slice';
+import Accordion from '../../../components/accordion';
+import Span from '../../../components/span';
 
 function EmailsManeger() {
     const [finished, setQuery, setFinished] = useQuery(false);
@@ -44,6 +47,8 @@ function EmailsManeger() {
     const [emailAddresses, setEmailAddresses] = useState<EmailAddressEntity[]>([]);
     const back: any = -1;
     const navigate = useNavigate();
+    const dispatch = useAppDispatch();
+    const pipeline = useAppSelector(state => state.pipeline.value);
     const [searchParams] = useSearchParams();
 
     const urlParams = {
@@ -69,7 +74,8 @@ function EmailsManeger() {
         formState: { errors },
         reset,
         control,
-        watch
+        watch,
+        setValue,
     } = useForm<z.infer<typeof schema>>({
         resolver: zodResolver(schema),
     });
@@ -78,8 +84,13 @@ function EmailsManeger() {
         return emailService.add({
             ...data,
             birthDate: new Date(dateFormat(data.birthDate))
-        }).then(() => {
-            navigate(back);
+        }).then(r => {
+            if (pipeline.isActive) {
+                dispatch(setPipelineData({ emailId: r.data?.id || r.data }))
+                navigate(USER_ROUTES.PIPELINE)
+            } else {
+                navigate(back)
+            }
         });
     }
 
@@ -144,15 +155,47 @@ function EmailsManeger() {
                 () => handleGetPlatforms(),
                 () => handleGetEmailAddresses(),
             ]);
-        } else {
+        }
+        else {
+            if (pipeline.isActive && pipeline.platformId) {
+                setValue('platformId', pipeline.platformId)
+            }
+
+            if (pipeline.isActive && pipeline.emailAddressId) {
+                setValue('emailAddressId', pipeline.emailAddressId)
+            }
+
+            if (pipeline.isActive && pipeline.email) {
+                setValue('username', pipeline.email)
+            }
+
+            if (pipeline.isActive && pipeline.password) {
+                setValue('password', pipeline.password)
+            }
+
+
+            if (pipeline.isActive && pipeline.phone) {
+                setValue('phone', pipeline.phone)
+            }
+
+
+            if (pipeline.isActive && pipeline.firstName) {
+                setValue('name', pipeline.firstName)
+            }
+
+            if (pipeline.isActive && pipeline.lastName) {
+                setValue('lastName', pipeline.lastName)
+            }
+
             setFinished(true);
             setIsEditing(true);
+
             setQuery([
                 () => handleGetPlatforms(),
                 () => handleGetEmailAddresses(),
             ]);
         }
-    }, []);
+    }, [pipeline.isActive, pipeline.platformId, pipeline.emailAddressId, pipeline.email, pipeline.password, pipeline.phone, pipeline.firstName, pipeline.lastName]);
 
 
     useEffect(() => {
@@ -163,8 +206,10 @@ function EmailsManeger() {
 
     useEffect(() => {
         const emailAddress = emailAddresses.find(e => e.id === watch("emailAddressId"));
+
         if (emailAddress) {
             const providerImage = emailAddress.provider?.image;
+
             if (providerImage) {
                 setCurrentImageSecundary(base64ToImage(providerImage.storedFile.base64, providerImage.storedFile.mimeType));
             }
@@ -177,7 +222,7 @@ function EmailsManeger() {
                 <div className='flex w-full gap-3 items-center p-6'>
                     <Link
                         className='cursor-pointer bg-white bg-opacity-5 hover:bg-opacity-15 w-10 h-10 flex items-center justify-center border-2 border-zinc-400 rounded-full top-0 left-0'
-                        to={back}
+                        to={pipeline.isActive ? USER_ROUTES.PIPELINE : back}
                     >
                         <ChevronLeft />
                     </Link>
@@ -185,75 +230,63 @@ function EmailsManeger() {
                         {urlParams.id ? "E-mail" : "New E-mail"}
                     </h1>
                 </div>
-
                 <Loading loading={!finished} />
-
                 <If conditional={finished}>
-                    <div className='flex gap-3 w-full my-28 rounded items-center justify-center flex-col p-3 center'>
+                    <div className='flex gap-6 w-full my-28 rounded items-center justify-center flex-col p-3 center'>
                         <div className='w-48 h-48 bg-tertiary rounded center relative'>
                             {<img className='w-16 min-h-16 ' src={currentImage ?? currentImageSecundary}></img>}
                             {currentImageSecundary && <img className='w-9 min-h-9 absolute bottom-0 right-0 m-1' src={currentImageSecundary}></img>}
                         </div>
-
-                        <div className='w-full flex-1 rounded center max-w-96 flex-col'>
-                            <If conditional={urlParams.id != null}>
-                                <AccordionContext>
-                                    <AccordionRoot variation='full'>
-                                        <AccordionTitle>
-                                            <div className='flex w-full justify-center'>
-                                                <div className='cursor-pointer bg-white bg-opacity-5 hover:bg-opacity-15 px-3 p-1 flex items-center justify-center border-2 border-zinc-400 rounded-full'>
-                                                    Recovery options
-                                                </div>
-                                            </div>
-                                        </AccordionTitle>
-                                        <AccordionContainer className='w-full'>
-                                            <Link
-                                                className='bg-black p-3 bg-opacity-30 cursor-pointer hover:text-violet-500 transition font-semibold'
-                                                to={`${USER_ROUTES.RECOVERY_KEYS}?id=${urlParams.id}`}
-                                                state={{
-                                                    currentImage,
-                                                    email: `${getEmailAddress()?.username}@${getEmailAddress()?.provider.signature}`,
-                                                    platform: getPlatform()?.name
-                                                }}
-                                            >
-                                                Keys
-                                            </Link>
-                                            <Link
-                                                className='bg-black p-3 bg-opacity-30 cursor-pointer hover:text-violet-500 transition font-semibold'
-                                                to={`${USER_ROUTES.RECOVERY_EMAILS}?id=${urlParams.id}`}
-                                                state={{
-                                                    currentImage,
-                                                    email: `${getEmailAddress()?.username}@${getEmailAddress()?.provider.signature}`,
-                                                    platform: getPlatform()?.name
-                                                }}
-                                            >
-                                                E-mails
-                                            </Link>
-                                            <Link
-                                                className='bg-black p-3 bg-opacity-30 cursor-pointer hover:text-violet-500 transition font-semibold'
-                                                to={`${USER_ROUTES.EMAIL_FILES}?id=${urlParams.id}`}
-                                                state={{
-                                                    currentImage,
-                                                    email: `${getEmailAddress()?.username}@${getEmailAddress()?.provider.signature}`,
-                                                    platform: getPlatform()?.name
-                                                }}
-                                            >
-                                                Files
-                                            </Link>
-                                        </AccordionContainer>
-                                    </AccordionRoot>
-                                </AccordionContext>
-                            </If>
-
+                        <div className='flex gap-3 w-full max-w-3xl'>
+                            <Link
+                                className='w-full'
+                                to={`${USER_ROUTES.RECOVERY_KEYS}?id=${urlParams.id}`}
+                                state={{
+                                    currentImage,
+                                    email: `${getEmailAddress()?.username}@${getEmailAddress()?.provider.signature}`,
+                                    platform: getPlatform()?.name
+                                }}
+                            >
+                                <Button variation='outline' className='w-full'>
+                                    Keys
+                                </Button>
+                            </Link>
+                            <Link
+                                className='w-full'
+                                to={`${USER_ROUTES.RECOVERY_EMAILS}?id=${urlParams.id}`}
+                                state={{
+                                    currentImage,
+                                    email: `${getEmailAddress()?.username}@${getEmailAddress()?.provider.signature}`,
+                                    platform: getPlatform()?.name
+                                }}
+                            >
+                                <Button variation='outline' className='w-full'>
+                                    E-mails
+                                </Button>
+                            </Link>
+                            <Link
+                                className='w-full'
+                                to={`${USER_ROUTES.EMAIL_FILES}?id=${urlParams.id}`}
+                                state={{
+                                    currentImage,
+                                    email: `${getEmailAddress()?.username}@${getEmailAddress()?.provider.signature}`,
+                                    platform: getPlatform()?.name
+                                }}
+                            >
+                                <Button variation='outline' className='w-full'>
+                                    Files
+                                </Button>
+                            </Link>
+                        </div>
+                        <div className='w-full flex-1 rounded center max-w-3xl flex-col'>
                             <Form variation='card' onSubmit={handleSubmit(handleAddOrUpdate)}>
-                                {/* Email Address Dropdown */}
                                 <InputRoot>
                                     <Label>Email Address</Label>
                                     <Controller
                                         name='emailAddressId'
                                         control={control}
                                         render={({ field }) => (
-                                            <DropdownContext onChange={field.onChange}>
+                                            <SelectContext onChange={field.onChange}>
                                                 <DropdownRoot
                                                     {...field}
                                                     disabled={!isEditing}
@@ -269,20 +302,18 @@ function EmailsManeger() {
                                                         ))}
                                                     </DropdownMenu>
                                                 </DropdownRoot>
-                                            </DropdownContext>
+                                            </SelectContext>
                                         )}
                                     />
                                     <Span variation='error'>{errors.emailAddressId?.message}</Span>
                                 </InputRoot>
-
-                                {/* Platform Dropdown */}
                                 <InputRoot>
                                     <Label>Platform</Label>
                                     <Controller
                                         name='platformId'
                                         control={control}
                                         render={({ field }) => (
-                                            <DropdownContext onChange={field.onChange}>
+                                            <SelectContext onChange={field.onChange}>
                                                 <DropdownRoot
                                                     {...field}
                                                     disabled={!isEditing}
@@ -298,13 +329,11 @@ function EmailsManeger() {
                                                         ))}
                                                     </DropdownMenu>
                                                 </DropdownRoot>
-                                            </DropdownContext>
+                                            </SelectContext>
                                         )}
                                     />
                                     <Span variation='error'>{errors.platformId?.message}</Span>
                                 </InputRoot>
-
-                                {/* Name Field */}
                                 <InputRoot>
                                     <Label>Name</Label>
                                     <InputText
@@ -313,8 +342,6 @@ function EmailsManeger() {
                                     />
                                     <Span variation='error'>{errors.name?.message}</Span>
                                 </InputRoot>
-
-                                {/* Last Name Field */}
                                 <InputRoot>
                                     <Label>Last Name</Label>
                                     <InputText
@@ -323,8 +350,6 @@ function EmailsManeger() {
                                     />
                                     <Span variation='error'>{errors.lastName?.message}</Span>
                                 </InputRoot>
-
-                                {/* Birth Date Field */}
                                 <InputRoot>
                                     <Label>Birth Date</Label>
                                     <InputText
@@ -334,8 +359,6 @@ function EmailsManeger() {
                                     />
                                     <Span variation='error'>{errors.birthDate?.message}</Span>
                                 </InputRoot>
-
-                                {/* Username Field */}
                                 <InputRoot>
                                     <Label>Username</Label>
                                     <InputText
@@ -344,8 +367,6 @@ function EmailsManeger() {
                                     />
                                     <Span variation='error'>{errors.username?.message}</Span>
                                 </InputRoot>
-
-                                {/* Phone Field */}
                                 <InputRoot>
                                     <Label>Phone</Label>
                                     <InputText
@@ -354,8 +375,6 @@ function EmailsManeger() {
                                     />
                                     <Span variation='error'>{errors.phone?.message}</Span>
                                 </InputRoot>
-
-                                {/* Password Field */}
                                 <InputRoot>
                                     <Label>Password</Label>
                                     <InputText
@@ -365,29 +384,23 @@ function EmailsManeger() {
                                     />
                                     <Span variation='error'>{errors.password?.message}</Span>
                                 </InputRoot>
-
-                                {/* Submit Buttons */}
-                                <If conditional={!isEditable}>
-                                    <Button>Add</Button>
-                                </If>
-                                <If conditional={isEditable}>
-                                    {isEditing ? (
-                                        <Button>Save</Button>
-                                    ) : (
-                                        <Span
-                                            onClick={() => setIsEditing(true)}
-                                            variation='button-default-full'
-                                        >
-                                            Edit
-                                        </Span>
-                                    )}
-                                </If>
+                                <div className='flex w-full center mt-3'>
+                                    {isEditing &&
+                                        <Button> Save</Button>
+                                    }
+                                    {!isEditable &&
+                                        <Button>Add</Button>
+                                    }
+                                    {!isEditing && isEditable &&
+                                        <Button onClick={() => setIsEditing(true)}>Edit</Button>
+                                    }
+                                </div>
                             </Form>
                         </div>
                     </div>
                 </If>
-            </div>
-        </Content>
+            </div >
+        </Content >
     );
 }
 

@@ -9,6 +9,7 @@ import { USER_ROUTES } from '../../../config/routes-config';
 import { platformService } from '../../../services/platforms-service';
 import CardLoading from '../../helpers/loading/card-loading';
 import { base64ToImage } from '../../../utils/extensions/image';
+import Card from '../../../components/card';
 
 function Platforms() {
     const [finished, setQuerys, setFinished] = useQuery(true)
@@ -55,31 +56,32 @@ function Platforms() {
                             </div>
                         </div>
                     </div>
-                    <div className='bg-gradient-to-t from-main-black-800 to-main-black-900 min-h-full w-full p-6 gap-6 flex flex-col    '>
-                        <div className='w-full max-w-80'>
+                    <div className='w-full p-6 gap-6 flex flex-col'>
+                        <div className='w-full max-w-3xl'>
                             <InputText onChange={(e) => setFilters({ ...filters, searchTerm: e.target.value })} placeholder='Pesquisar' variation='ultra-rounded'></InputText>
                         </div>
                         <CardLoading loading={!finished}>
                             <div className='grid sm:grid-cols-2 xl:grid-cols-3 h-full gap-3'>
                                 {platform.filter(e => e.name.toLowerCase().includes(filters.searchTerm.toLowerCase())).map((item, index) =>
-                                    <div key={index}
-                                        className=' bg-tertiary overflow-hidden rounded flex-col h-48 flex relative items-center transition-all justify-center group'
-                                    >
-                                        <button onClick={() => handleDeleteDomain(item.id)} className='z-20 opacity-0 p-3 group-hover:opacity-100 transition-all absolute top-0 right-0 hover:text-red-400 '>
-                                            <TrashIcon />
-                                        </button>
-                                        <Link
-                                            to={{
-                                                pathname: USER_ROUTES.MANAGER_PLATFORMS,
-                                                search: "id=" + item.id
-                                            }} className='w-full h-full flex flex-col gap-3 rounded center '
-                                        >
-                                            <img className='w-16' src={base64ToImage(item?.image?.storedFile?.base64, item?.image?.storedFile?.mimeType)} alt={item?.name} />
-                                            <p className='font-semibold'>
-                                                {item?.name}
-                                            </p>
-                                        </Link>
-                                    </div>
+                                    <Card>
+                                        <div key={index} className='overflow-hidden rounded flex-col h-48 flex relative items-center transition-all justify-center group'>
+                                            <button onClick={() => handleDeleteDomain(item.id)} className='z-20 opacity-0 p-3 group-hover:opacity-100 transition-all absolute top-0 right-0 hover:text-red-400 '>
+                                                <TrashIcon />
+                                            </button>
+                                            <Link
+                                                to={{
+                                                    pathname: USER_ROUTES.MANAGER_PLATFORMS,
+                                                    search: "id=" + item.id
+                                                }} className='w-full h-full flex flex-col gap-3 rounded center '
+                                            >
+                                                <img className='w-16' src={base64ToImage(item?.image?.storedFile?.base64, item?.image?.storedFile?.mimeType)} alt={item?.name} />
+                                                <p className='font-semibold'>
+                                                    {item?.name}
+                                                </p>
+                                            </Link>
+                                        </div>
+                                    </Card>
+
                                 )}
                             </div>
                         </CardLoading>

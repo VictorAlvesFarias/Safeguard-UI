@@ -10,6 +10,12 @@ class FileService extends BaseService {
         return result;
     }
 
+    public async addFromUrl(imageUrl: string) {
+        const result = this.post<any>({ api: env, href: "/upload-file-url" }, { imageUrl })
+
+        return result;
+    }
+
     public async remove(id) {
         const result = this.delete({ api: env, href: "/delete-file", params: { id: id } })
 

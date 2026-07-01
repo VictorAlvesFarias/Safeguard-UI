@@ -85,7 +85,7 @@ function RecoveryKeys() {
                 </div>
                 <div className='overflow-auto bg-opacity-50 min-h-full w-full p-6 gap-6 flex flex-col    '>
                     <form className='flex gap-3' onSubmit={handleSubmit((e) => setQuerys(() => handleAddRecoveryKey(e)))}>
-                        <div className='w-full '>
+                        <div className='w-full max-w-3xl'>
                             <InputText {...register('key')} placeholder='New key' variation='ultra-rounded'></InputText>
                         </div>
                         <Button>Add</Button>

@@ -66,8 +66,8 @@ function Emails() {
                         </div>
                     </div>
                 </div>
-                <div className='overflow-auto bg-gradient-to-t from-main-black-800 to-main-black-900 min-h-full w-full p-6 gap-6 flex flex-col    '>
-                    <div className='w-full max-w-80'>
+                <div className='overflow-auto w-full p-6 gap-6 flex flex-col    '>
+                    <div className='w-full max-w-3xl'>
                         <InputText onChange={(e) => setFilters({ ...filters, searchTerm: e.target.value })} placeholder='Pesquisar' variation='ultra-rounded'></InputText>
                     </div>
                     <CardLoading loading={!finished}>
@@ -77,7 +77,6 @@ function Emails() {
                                     <TableCell variation='head'>#</TableCell>
                                     <TableCell variation='head'></TableCell>
                                     <TableCell variation='head-full'>Endereço</TableCell>
-                                    <TableCell variation='head-full'>Senha</TableCell>
                                     <TableCell variation='head-full'>Actions</TableCell>
                                 </TableRow>
                             </TableHead>
@@ -86,7 +85,7 @@ function Emails() {
                                     <TableRow>
                                         <TableCell variation='body'>{index + 1}</TableCell>
                                         <TableCell variation='body'>
-                                            <div className='w-12 h-12 bg-zinc-700 rounded flex es-center justify-center'>
+                                            <div className='w-12 h-12 bg-zinc-700 rounded flex es-center justify-center p-2'>
                                                 {e.platform.image &&
                                                     <img className='w-12' src={base64ToImage(e.platform?.image.storedFile.base64, e.platform.image.storedFile.mimeType)} alt="" />
                                                 }
@@ -102,8 +101,6 @@ function Emails() {
                                             <button onClick={() => copyToClipboard(e.password)} className='z-20  p-3 group-hover:opacity-100 transition-all hover:text-main-violet-100 '>
                                                 <CopyIcon />
                                             </button>
-                                        </TableCell>
-                                        <TableCell variation='body'>
                                             <button onClick={() => setQuerys(() => handleDeleteEmail(e.id))} className='z-20  p-3 group-hover:opacity-100 transition-all hover:text-red-400 '>
                                                 <TrashIcon />
                                             </button>

@@ -22,6 +22,9 @@ import { base64ToImage } from '../../../utils/extensions/image';
 import { useQuery } from "../../../utils/hooks/query-hooks";
 import Loading from "../../helpers/loading/loading";
 import { ChevronLeft } from 'lucide-react';
+import { useAppDispatch, useAppSelector } from '../../../utils/hooks/redux-hooks';
+import { setPipelineData } from '../../../slices/pipeline-slice';
+import { USER_ROUTES } from '../../../config/routes-config';
 
 function PlatformsManeger() {
     const [finished, setQuery, setFinished] = useQuery(false)
@@ -30,6 +33,8 @@ function PlatformsManeger() {
     const [isEditing, setIsEditing] = useState(false)
     const back: any = -1
     const navigate = useNavigate()
+    const dispatch = useAppDispatch()
+    const pipeline = useAppSelector(state => state.pipeline.value)
     const [searchParams, setSearchParams] = useSearchParams()
 
     const urlParams = {
@@ -52,7 +57,12 @@ function PlatformsManeger() {
     function handleAddPlatform(data: any) {
         return platformService.add(toFormData(data))
             .then(r => {
-                navigate(back)
+                if (pipeline.isActive) {
+                    dispatch(setPipelineData({ platformId: r.data?.id || r.data }))
+                    navigate(USER_ROUTES.PIPELINE)
+                } else {
+                    navigate(back)
+                }
             })
     }
     function handleUpdatePlatform(data: any) {
@@ -83,27 +93,29 @@ function PlatformsManeger() {
             setQuery(() => handleGetPlatform())
         }
         else {
+            if (pipeline.isActive && pipeline.platform) {
+                setValue('name', pipeline.platform)
+            }
             setFinished(true)
             setIsEditing(true)
         }
-    }, [])
+    }, [pipeline.isActive, pipeline.platform])
 
     return (
         <Content >
             <div className='bg-fort w-full h-full overflow-auto relative transition-all bg-gradient-to-t from-main-black-800 to-transparent duration-500   bg-main-violet-900'>
                 <div className='flex w-full gap-3 items-center p-6'>
-                    <Link className='cursor-pointer  bg-white bg-opacity-5 hover:bg-opacity-15 w-10 h-10 flex items-center justify-center border-2 border-zinc-400 rounded-full top-0 left-0 ' to={back}>
+                    <Link className='cursor-pointer  bg-white bg-opacity-5 hover:bg-opacity-15 w-10 h-10 flex items-center justify-center border-2 border-zinc-400 rounded-full top-0 left-0 ' to={pipeline.isActive ? USER_ROUTES.PIPELINE : back}>
                         <ChevronLeft />
                     </Link>
                     <h1 className='font-bold font- text-white text-3xl font-sans '>{urlParams.id ? "Platform" : "New Platform"}</h1>
                 </div>
                 <Loading loading={!finished} />
                 <If conditional={finished}>
-                    <div className='flex gap-3 w-full  my-28 rounded items-center justify-center  flex-col p-3  center '>
+                    <div className='flex gap-6 w-full  my-28 rounded items-center justify-center  flex-col p-3  center '>
                         <div className='w-48 h-48 bg-tertiary rounded center'>
                             {currentImage && <img className='w-16' src={currentImage}></img>}
                         </div>
-                        <Span variation='error'>{errors.imageId?.message}</Span>
                         <If conditional={isEditing || isEditable == false}>
                             <ModalContext>
                                 <ModalRootContainer>
@@ -114,23 +126,24 @@ function PlatformsManeger() {
                                 </ModalOpen>
                             </ModalContext>
                         </If>
-                        <div className=' w-full flex-1 rounded center max-w-96 flex-col'>
+                        <div className=' w-full flex-1 rounded center max-w-3xl flex-col'>
                             <Form variation='card' onSubmit={handleSubmit((e) => handleAddOrUpdate(e))} >
                                 <InputRoot>
                                     <Label >Name</Label>
                                     <InputText placeholder='name' {...register('name', { disabled: !isEditing })} />
                                     <Span variation='error'>{errors.name?.message}</Span>
                                 </InputRoot>
-                                <If conditional={!isEditable}>
-                                    <Button>Create</Button>
-                                </If>
-                                <If conditional={isEditable}>
-                                    {
-                                        isEditing ?
-                                            <Button>Save</Button> :
-                                            <Span onClick={() => setIsEditing(true)} variation='button-default-full'>Edit</Span>
+                                <div className='flex w-full center mt-3'>
+                                    {isEditing &&
+                                        <Button> Save</Button>
                                     }
-                                </If>
+                                    {!isEditable &&
+                                        <Button>Add</Button>
+                                    }
+                                    {!isEditing && isEditable &&
+                                        <Button onClick={() => setIsEditing(true)}>Edit</Button>
+                                    }
+                                </div>
                             </Form>
                         </div>
                     </div>

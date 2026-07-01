@@ -2,6 +2,7 @@ const ADMIN_ROUTES = {
 
 };
 const USER_ROUTES = {
+  PIPELINE: "/pipeline",
   MANAGER_DOMAINS: "/domains/maneger",
   MANAGER_EMAILS: "/emails/maneger",
   MANAGER_EMAIL_ADDRESS: "/email-addresses/maneger",

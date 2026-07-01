@@ -64,17 +64,14 @@ function EmailAddresses() {
                         </div>
                     </div>
                 </div>
-
-                {/* Table section */}
-                <div className='overflow-auto bg-gradient-to-t from-main-black-800 to-main-black-900 min-h-full w-full p-6 gap-6 flex flex-col'>
-                    <div className='w-full max-w-80'>
+                <div className='overflow-auto w-full p-6 gap-6 flex flex-col'>
+                    <div className='w-full max-w-3xl'>
                         <InputText
                             onChange={(e) => setFilters({ ...filters, searchTerm: e.target.value })}
                             placeholder='Search'
                             variation='ultra-rounded'
                         />
                     </div>
-
                     <CardLoading loading={!finished}>
                         <TableRoot>
                             <TableHead>
@@ -85,7 +82,6 @@ function EmailAddresses() {
                                     <TableCell variation='head-full'>Actions</TableCell>
                                 </TableRow>
                             </TableHead>
-
                             <TableBody>
                                 {emailAddresses
                                     .filter(e =>
@@ -96,7 +92,7 @@ function EmailAddresses() {
                                         <TableRow key={index}>
                                             <TableCell variation='body'>{index + 1}</TableCell>
                                             <TableCell variation='body'>
-                                                <div className='w-12 h-12 bg-zinc-700 rounded flex items-center justify-center'>
+                                                <div className='w-12 h-12 bg-zinc-700 rounded flex items-center justify-center p-2'>
                                                     <img
                                                         className='w-10'
                                                         src={base64ToImage(e.provider?.image?.storedFile.base64, e.provider?.image?.storedFile.mimeType)}
@@ -127,7 +123,7 @@ function EmailAddresses() {
                                         </TableRow>
                                     ))}
                             </TableBody>
-                        </TableRoot> 
+                        </TableRoot>
                     </CardLoading>
                 </div>
             </div>

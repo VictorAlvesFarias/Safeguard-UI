@@ -17,7 +17,7 @@ import InputText from '../../../components/input-text';
 import Button from '../../../components/button';
 import InputRoot from '../../../components/input-root';
 import Label from '../../../components/label';
-import { DropdownContext } from 'react-base-components';
+import { SelectContext } from 'react-base-components';
 import DropdownRoot from '../../../components/dropdown-root';
 import DropdownMenu from '../../../components/dropdown-menu';
 import DropdownOption from '../../../components/dropdown-option';
@@ -102,25 +102,27 @@ function RecoveryEmails() {
                 </div>
                 <div className='overflow-auto bg-opacity-50 min-h-full w-full p-6 gap-6 flex flex-col    '>
                     <form className='flex gap-3' onSubmit={handleSubmit((e) => setQuerys(() => handleAddRecoveryEmail(e)))}>
-                        <InputRoot>
-                            <Controller
-                                name='parentEmailId'
-                                control={control}
-                                render={({ field, field: { onChange } }) => {
-                                    return (
-                                        <DropdownContext onChange={onChange}>
-                                            <DropdownRoot variation='ultra-rounded' {...field} placeholder='Select e-mail'>
-                                                <DropdownMenu>
-                                                    {emails.map((e, i) =>
-                                                        <DropdownOption key={i} label={`${e.username}@${e.emailAddress.provider.signature}`} value={e.id} />
-                                                    )}
-                                                </DropdownMenu>
-                                            </DropdownRoot>
-                                        </DropdownContext>
-                                    )
-                                }}
-                            />
-                        </InputRoot>
+                        <div className='w-full max-w-3xl'>
+                            <InputRoot>
+                                <Controller
+                                    name='parentEmailId'
+                                    control={control}
+                                    render={({ field, field: { onChange } }) => {
+                                        return (
+                                            <SelectContext onChange={onChange}>
+                                                <DropdownRoot variation='ultra-rounded' {...field} placeholder='Select e-mail'>
+                                                    <DropdownMenu>
+                                                        {emails.map((e, i) =>
+                                                            <DropdownOption key={i} label={`${e.username}@${e.emailAddress.provider.signature}`} value={e.id} />
+                                                        )}
+                                                    </DropdownMenu>
+                                                </DropdownRoot>
+                                            </SelectContext>
+                                        )
+                                    }}
+                                />
+                            </InputRoot>
+                        </div>
                         <Button>Add</Button>
                     </form>
                     <CardLoading loading={!finished}>

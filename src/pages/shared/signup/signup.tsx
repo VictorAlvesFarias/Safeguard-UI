@@ -113,7 +113,7 @@ function Signup() {
               </Form>
             </div>
           ) : (
-            <div className='gap-6 flex flex-col center max-w-96 bg-main-black-800 shadow-sm rounded sm:px-12 px-6 py-12 sm:w-fit w-full'>
+            <div className='gap-6 flex flex-col center max-w-3xl bg-main-black-800 shadow-sm rounded sm:px-12 px-6 py-12 sm:w-fit w-full'>
               <div className='flex items-center'>
                 <h1 className='font-semibold text-2xl'>Account Successfully Created</h1>
                 <ShieldCheck className='w-16 h-16' strokeWidth={1.5} />

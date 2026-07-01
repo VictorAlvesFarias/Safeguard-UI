@@ -5,7 +5,8 @@ import { loginService } from '../services/login-service';
 import { AUTH } from '../config/auth-config';
 import { AuthContextType } from '../interfaces/shared/auth-context';
 import { AuthenticationService } from '../services/authentication-service';
-import { useNavigate } from 'react-router-dom'
+import { consumePipelineReturnUrl, savePipelineReturnUrl } from '../utils/pipeline-params';
+import { useNavigate } from 'react-router-dom';
 
 const AuthContext = createContext<AuthContextType>({
   isAuthenticated: false,
@@ -24,14 +25,15 @@ function AuthProvider({ children }: { children: React.ReactNode }) {
 
   function handleLogout() {
     loginService.logout()
+    savePipelineReturnUrl()
     navigation('/login')
   }
-  function handleSignIn(data) {
+  function handleSignIn(data: { username: string, password: string }) {
     const result = loginService.loginPost(data)
       .then(e => {
         setIsAuthenticated(true)
         setPermissionsContext(e.claims)
-        navigation("/")
+        navigation(consumePipelineReturnUrl() ?? '/')
       })
 
     return result
@@ -46,6 +48,7 @@ function AuthProvider({ children }: { children: React.ReactNode }) {
       AUTH.AUTHORIZE_NOT_REQUIRED,
       (event) => {
         if (event == "logout") {
+          savePipelineReturnUrl()
           navigation('/login')
           loginService.logout()
         }
