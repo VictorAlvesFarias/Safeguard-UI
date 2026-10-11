@@ -34,6 +34,8 @@ import EmailAddressManeger from "../pages/user/email-address-maneger/email-addre
 import EmailAddresses from "../pages/user/email-address/email-address";
 import EmailFile from "../pages/user/email-files/email-files";
 import Pipeline from "../pages/user/pipeline/pipeline";
+import Authenticators from "../pages/user/authenticators/authenticators";
+import AuthenticatorsManeger from "../pages/user/authenticators-maneger/authenticators-maneger";
 
 function UserRouters() {
   const { logout, isAuthenticated } = useContext(AuthContext);
@@ -85,6 +87,12 @@ function UserRouters() {
             }}>
               <SidebarHref>Platforms</SidebarHref>
             </SidebarItem>
+            <SidebarItem redirect={() => {
+              navigate(USER_ROUTES.AUTHENTICATORS)
+              return USER_ROUTES.AUTHENTICATORS
+            }}>
+              <SidebarHref>Autenticador</SidebarHref>
+            </SidebarItem>
             <ModalContext>
               <div className="flex-1 flex items-end w-full">
                 <ModalOpen className="w-full h-fit">
@@ -127,6 +135,8 @@ function UserRouters() {
               <Route path={USER_ROUTES.RECOVERY_EMAILS} element={<RecoveryEmails />} />
               <Route path={USER_ROUTES.EMAIL_FILES} element={<EmailFile />} />
               <Route path={USER_ROUTES.PIPELINE} element={<Pipeline />} />
+              <Route path={USER_ROUTES.AUTHENTICATORS} element={<Authenticators />} />
+              <Route path={USER_ROUTES.MANAGER_AUTHENTICATORS} element={<AuthenticatorsManeger />} />
             </Routes>
           </SidebarContent>
         </SidebarRoot>

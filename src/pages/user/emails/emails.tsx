@@ -17,6 +17,20 @@ import { EmailEntity } from '../../../interfaces/entities/email-entity'
 import { base64ToImage } from '../../../utils/extensions/image';
 import { copyToClipboard } from '../../../utils/extensions/clipboard';
 
+function PlatformIcon({ src, name }: { src: string, name?: string }) {
+    const [failed, setFailed] = useState(false)
+
+    useEffect(() => setFailed(false), [src])
+
+    return (
+        <div className='w-12 h-12 bg-zinc-700 rounded flex items-center justify-center p-2 overflow-hidden shrink-0'>
+            {src && !failed
+                ? <img className='w-full h-full object-contain' src={src} alt="" onError={() => setFailed(true)} />
+                : <span className='text-zinc-300 font-bold text-lg'>{(name ?? '?').trim().charAt(0).toUpperCase()}</span>}
+        </div>
+    )
+}
+
 function Emails() {
     const [finished, setQuerys, setFinished] = useQuery()
     const [addButtomHovered, setAddButtomHovered] = useState(false)
@@ -82,14 +96,13 @@ function Emails() {
                             </TableHead>
                             <TableBody>
                                 {emails.filter(e => `${e.username}@${e.emailAddress.provider.signature}`.toLowerCase().includes(filters.searchTerm.toLowerCase())).map((e, index) =>
-                                    <TableRow>
+                                    <TableRow key={e.id}>
                                         <TableCell variation='body'>{index + 1}</TableCell>
                                         <TableCell variation='body'>
-                                            <div className='w-12 h-12 bg-zinc-700 rounded flex es-center justify-center p-2'>
-                                                {e.platform.image &&
-                                                    <img className='w-12' src={base64ToImage(e.platform?.image.storedFile.base64, e.platform.image.storedFile.mimeType)} alt="" />
-                                                }
-                                            </div>
+                                            <PlatformIcon
+                                                name={e.platform?.name}
+                                                src={base64ToImage(e.platform?.image?.storedFile?.base64, e.platform?.image?.storedFile?.mimeType)}
+                                            />
                                         </TableCell>
                                         <TableCell onClick={() => navigate(`${USER_ROUTES.MANAGER_EMAILS}?id=${e.id}`)} variation='body'>
                                             <div className='flex flex-col'>

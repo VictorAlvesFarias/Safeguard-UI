@@ -1,42 +1,45 @@
-export interface ExtensionQueryParams {
-  domain: string | null
-  platform: string | null
-  email: string | null
-  address: string | null
-  iconUrl: string | null
-  password: string | null
-  phone: string | null
-  firstName: string | null
-  lastName: string | null
+import { CaptureEntity } from '../interfaces/entities/capture-entity'
+import { PipelineData } from '../slices/pipeline-slice'
+
+export function getCaptureId(searchParams: URLSearchParams): string | null {
+  const id = searchParams.get('capture')
+  return id && /^[a-f0-9]{32}$/i.test(id) ? id : null
 }
 
-function extractEmailLocalPart(email: string | null): string | null {
-  if (!email) {
+function extractEmailLocalPart(value: string | null): string | null {
+  if (!value) {
     return null
   }
 
-  const atIndex = email.indexOf('@')
+  const atIndex = value.indexOf('@')
   if (atIndex <= 0) {
-    return email.trim() || null
+    return value.trim() || null
   }
 
-  return email.slice(0, atIndex).trim() || null
+  return value.slice(0, atIndex).trim() || null
 }
 
-export function parseExtensionQueryParams(searchParams: URLSearchParams): ExtensionQueryParams {
-  const email = searchParams.get('email')
-  const explicitAddress = searchParams.get('address')
+function extractEmailDomain(value: string | null): string | null {
+  const atIndex = value?.indexOf('@') ?? -1
+  if (!value || atIndex <= 0) {
+    return null
+  }
 
+  return value.slice(atIndex + 1).trim().toLowerCase() || null
+}
+
+export function captureToPipelineData(capture: CaptureEntity): Partial<PipelineData> {
   return {
-    domain: searchParams.get('sourceDomain') ?? searchParams.get('domain'),
-    platform: searchParams.get('platform'),
-    email,
-    address: explicitAddress ?? extractEmailLocalPart(email),
-    iconUrl: searchParams.get('iconUrl'),
-    password: searchParams.get('password'),
-    phone: searchParams.get('phone'),
-    firstName: searchParams.get('firstName'),
-    lastName: searchParams.get('lastName'),
+    captureId: capture.id,
+    domain: extractEmailDomain(capture.username),
+    platform: capture.platform,
+    email: capture.username,
+    address: extractEmailLocalPart(capture.username),
+    iconUrl: capture.iconUrl,
+    password: capture.password,
+    phone: capture.phone,
+    firstName: capture.firstName,
+    lastName: capture.lastName,
   }
 }
 

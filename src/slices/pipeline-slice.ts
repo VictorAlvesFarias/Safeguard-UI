@@ -1,6 +1,7 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
 
 export interface PipelineData {
+  captureId: string | null
   domain: string | null
   iconUrl: string | null
   platform: string | null
@@ -20,6 +21,7 @@ export interface PipelineData {
 
 const initialState: { value: PipelineData } = {
   value: {
+    captureId: null,
     domain: null,
     iconUrl: null,
     platform: null,

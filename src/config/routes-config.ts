@@ -16,6 +16,8 @@ const USER_ROUTES = {
   RECOVERY_KEYS: "/recovery-keys",
   RECOVERY_EMAILS: "/recovery-emails",
   EMAIL_FILES: "/email-files",
+  AUTHENTICATORS: "/authenticators",
+  MANAGER_AUTHENTICATORS: "/authenticators/maneger",
 };
 
 export {

@@ -96,10 +96,16 @@ function PlatformsManeger() {
             if (pipeline.isActive && pipeline.platform) {
                 setValue('name', pipeline.platform)
             }
+            if (pipeline.isActive && pipeline.iconId) {
+                setValue('imageId', String(pipeline.iconId), { shouldValidate: true })
+                if (pipeline.iconUrl) {
+                    setCurrentImage(pipeline.iconUrl)
+                }
+            }
             setFinished(true)
             setIsEditing(true)
         }
-    }, [pipeline.isActive, pipeline.platform])
+    }, [pipeline.isActive, pipeline.platform, pipeline.iconId])
 
     return (
         <Content >
