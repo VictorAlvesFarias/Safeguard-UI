@@ -32,9 +32,11 @@ export class AuthenticationService {
 
         if (!this.timeoutStarted) {
             this.timeoutStarted = true
+            // setTimeout fires at once for delays over 2^31-1 ms (~24.8 days): cap it. The 30-day
+            // refresh token outlives that; at the cap the "logout" handler just renews the session.
             setTimeout(() => {
                 return redirect("logout") ?? false
-            }, timeDiference);
+            }, Math.min(Math.max(timeDiference, 0), 2147483647));
         }
 
         return redirect("authenticate") ?? true
