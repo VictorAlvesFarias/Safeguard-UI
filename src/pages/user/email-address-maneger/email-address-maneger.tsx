@@ -148,11 +148,8 @@ function EmailAddressManeger() {
                         </div>
                         <div className=' w-full flex-1 rounded center max-w-3xl flex-col'>
                             <Form variation='card' onSubmit={handleSubmit((e) => handleAddOrUpdate(e))} >
-                                <InputRoot>
-                                    <Label >Username</Label>
-                                    <InputText placeholder='Username' {...register('username', { disabled: !isEditing })} />
-                                    <Span variation='error'>{errors.username?.message}</Span>
-                                </InputRoot>
+                                <InputText error={errors.username?.message} placeholder='Username' {...register('username', { disabled: !isEditing })} />
+
                                 <InputRoot>
                                     <Label >Provider</Label>
                                     <Controller
