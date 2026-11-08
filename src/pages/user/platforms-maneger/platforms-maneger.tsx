@@ -25,6 +25,7 @@ import { ChevronLeft } from 'lucide-react';
 import { useAppDispatch, useAppSelector } from '../../../utils/hooks/redux-hooks';
 import { setPipelineData } from '../../../slices/pipeline-slice';
 import { USER_ROUTES } from '../../../config/routes-config';
+import PlatformSites from './platform-sites';
 
 function PlatformsManeger() {
     const [finished, setQuery, setFinished] = useQuery(false)
@@ -152,6 +153,9 @@ function PlatformsManeger() {
                                 </div>
                             </Form>
                         </div>
+                        <If conditional={isEditable && urlParams.id != null}>
+                            <PlatformSites platformId={urlParams.id as string} />
+                        </If>
                     </div>
                 </If>
             </div>

@@ -1,4 +1,5 @@
 import { EmailEntity } from '../../interfaces/entities/email-entity'
+import { EmailAddressEntity } from '../../interfaces/entities/email-address-entity'
 import { OtpEntry } from './otp'
 
 const normalize = (value: string | null | undefined) =>
@@ -9,6 +10,16 @@ const addressOf = (account: EmailEntity) =>
 
 export function accountLabel(account: EmailEntity) {
     return `${account.platform?.name ?? 'Sem plataforma'} · ${addressOf(account) || account.username}`
+}
+
+export function addressLabel(address: EmailAddressEntity) {
+    return `${address.username}@${address.provider?.signature ?? ''}`
+}
+
+/** The e-mail address the code belongs to: the account name is the address itself. */
+export function suggestAddress(entry: OtpEntry, addresses: EmailAddressEntity[]): number | null {
+    const name = entry.accountName.trim().toLowerCase()
+    return (name.includes('@') && addresses.find(address => addressLabel(address).toLowerCase() === name) as any)?.id ?? null
 }
 
 export function suggestAccount(entry: OtpEntry, accounts: EmailEntity[]): number | null {

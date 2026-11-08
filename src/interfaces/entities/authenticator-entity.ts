@@ -1,4 +1,5 @@
 import { EmailEntity } from "./email-entity"
+import { EmailAddressEntity } from "./email-address-entity"
 import { OtpAlgorithm } from "../../utils/authenticator/otp"
 
 interface AuthenticatorEntity {
@@ -11,6 +12,8 @@ interface AuthenticatorEntity {
     period: number
     emailId: number | null
     email: EmailEntity | null
+    emailAddressId: number | null
+    emailAddress: EmailAddressEntity | null
 }
 
 export {

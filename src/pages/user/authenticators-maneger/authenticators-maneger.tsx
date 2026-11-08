@@ -21,7 +21,9 @@ import { AuthenticatorEntity } from '../../../interfaces/entities/authenticator-
 import { EmailEntity } from '../../../interfaces/entities/email-entity';
 import { authenticatorService } from '../../../services/authenticator-service';
 import { emailService } from '../../../services/emails-service';
-import { accountLabel, suggestAccount } from '../../../utils/authenticator/accounts';
+import { accountLabel, addressLabel, suggestAccount, suggestAddress } from '../../../utils/authenticator/accounts';
+import { emailAddressService } from '../../../services/email-address-service';
+import { EmailAddressEntity } from '../../../interfaces/entities/email-address-entity';
 import { formatCode, generateCode, isValidSecret, OtpAlgorithm, OtpEntry, parseOtpInput, readQrCode } from '../../../utils/authenticator/otp';
 import { useQuery } from '../../../utils/hooks/query-hooks';
 import Loading from '../../helpers/loading/loading';
@@ -64,6 +66,7 @@ function AuthenticatorsManeger() {
     const [isEditable, setIsEditable] = useState(false)
     const [isEditing, setIsEditing] = useState(false)
     const [accounts, setAccounts] = useState<EmailEntity[]>([])
+    const [addresses, setAddresses] = useState<EmailAddressEntity[]>([])
     const [choices, setChoices] = useState<OtpEntry[]>([])
     const [showAdvanced, setShowAdvanced] = useState(false)
     const [reading, setReading] = useState(false)
@@ -83,18 +86,19 @@ function AuthenticatorsManeger() {
         digits: z.number(),
         period: z.number(),
         emailId: z.number(),
+        emailAddressId: z.number(),
     }).refine(e => e.issuer.trim() || e.accountName.trim(), {
         message: 'Informe o serviço ou a conta',
         path: ['issuer'],
     })
     const { register, handleSubmit, formState: { errors }, setValue, setError, reset, control, watch } = useForm<z.infer<typeof schema>>({
         resolver: zodResolver(schema),
-        defaultValues: { issuer: '', accountName: '', secret: '', algorithm: 'SHA1', digits: 6, period: 30, emailId: 0 },
+        defaultValues: { issuer: '', accountName: '', secret: '', algorithm: 'SHA1', digits: 6, period: 30, emailId: 0, emailAddressId: 0 },
     })
 
     function fill(entry: OtpEntry) {
         setChoices([])
-        reset({ ...entry, emailId: suggestAccount(entry, accounts) ?? 0 })
+        reset({ ...entry, emailId: suggestAccount(entry, accounts) ?? 0, emailAddressId: suggestAddress(entry, addresses) ?? 0 })
         setShowAdvanced(entry.algorithm !== 'SHA1' || entry.digits !== 6 || entry.period !== 30)
     }
 
@@ -121,20 +125,20 @@ function AuthenticatorsManeger() {
     function handleGetAuthenticator() {
         return authenticatorService.getById({ id: urlParams.id })
             .then(({ res }: { res: AuthenticatorEntity }) => {
-                reset({ ...res, emailId: res.emailId ?? 0 })
+                reset({ ...res, emailId: res.emailId ?? 0, emailAddressId: res.emailAddressId ?? 0 })
                 setIsEditable(true)
                 setShowAdvanced(res.algorithm !== 'SHA1' || res.digits !== 6 || res.period !== 30)
             })
     }
 
-    function handleAddAuthenticator(data: OtpEntry & { emailId: number | null }) {
+    function handleAddAuthenticator(data: OtpEntry & { emailId: number | null, emailAddressId: number | null }) {
         return authenticatorService.add(data)
             .then(() => {
                 navigate(USER_ROUTES.AUTHENTICATORS)
             })
     }
 
-    function handleUpdateAuthenticator(data: OtpEntry & { emailId: number | null }) {
+    function handleUpdateAuthenticator(data: OtpEntry & { emailId: number | null, emailAddressId: number | null }) {
         return authenticatorService.update(data, Number(urlParams.id))
             .then(() => {
                 setIsEditing(false)
@@ -156,7 +160,7 @@ function AuthenticatorsManeger() {
             return
         }
 
-        const request = { ...entry, emailId: data.emailId || null }
+        const request = { ...entry, emailId: data.emailId || null, emailAddressId: data.emailAddressId || null }
 
         if (isEditable) {
             setQuery(() => handleUpdateAuthenticator(request))
@@ -169,6 +173,8 @@ function AuthenticatorsManeger() {
     useEffect(() => {
         emailService.getAll()
             .then(({ res }: any) => setAccounts(res ?? []))
+        emailAddressService.getAll()
+            .then(({ res }: any) => setAddresses(res ?? []))
 
         if (urlParams.id != null) {
             setQuery(() => handleGetAuthenticator())
@@ -204,7 +210,7 @@ function AuthenticatorsManeger() {
 
         window.addEventListener('paste', handlePaste)
         return () => window.removeEventListener('paste', handlePaste)
-    }, [urlParams.id, accounts])
+    }, [urlParams.id, accounts, addresses])
 
     const values = watch()
 
@@ -366,6 +372,25 @@ function AuthenticatorsManeger() {
                                             </SelectContext>
                                         )}
                                     />
+                                </InputRoot>
+                                <InputRoot>
+                                    <Label>Vincular ao endereço de e-mail</Label>
+                                    <Controller
+                                        name='emailAddressId'
+                                        control={control}
+                                        render={({ field }) => (
+                                            <SelectContext onChange={field.onChange}>
+                                                <DropdownRoot {...field} disabled={!isEditing} placeholder='Selecione o endereço'>
+                                                    <DropdownMenu>
+                                                        {[{ id: 0, label: 'Nenhum' }, ...addresses.map(e => ({ id: e.id, label: addressLabel(e) }))].map(e => (
+                                                            <DropdownOption key={e.id} label={e.label} value={e.id} />
+                                                        ))}
+                                                    </DropdownMenu>
+                                                </DropdownRoot>
+                                            </SelectContext>
+                                        )}
+                                    />
+                                    <p className='text-xs text-zinc-500 px-1 m-0'>Para o código do próprio e-mail (ex.: a verificação em duas etapas do Gmail). Pode ser usado junto com a conta.</p>
                                 </InputRoot>
                                 <LiveCode entry={values as OtpEntry} />
                                 <div className='flex w-full center mt-3'>

@@ -9,7 +9,7 @@ import ModalRoot from '../../../components/modal-root';
 import { USER_ROUTES } from '../../../config/routes-config';
 import { AuthenticatorEntity } from '../../../interfaces/entities/authenticator-entity';
 import { authenticatorService } from '../../../services/authenticator-service';
-import { accountLabel } from '../../../utils/authenticator/accounts';
+import { accountLabel, addressLabel } from '../../../utils/authenticator/accounts';
 import { formatCode, generateCode } from '../../../utils/authenticator/otp';
 import { copyToClipboard } from '../../../utils/extensions/clipboard';
 import { base64ToImage } from '../../../utils/extensions/image';
@@ -81,8 +81,10 @@ function AuthenticatorCard({ authenticator, now, onEdit, onDelete }: Authenticat
                         style={{ width: `${(remaining / authenticator.period) * 100}%` }}
                     />
                 </div>
-                {authenticator.email &&
-                    <p className='text-xs text-zinc-500 truncate'>Vinculado a {accountLabel(authenticator.email)}</p>
+                {(authenticator.email || authenticator.emailAddress) &&
+                    <p className='text-xs text-zinc-500 truncate'>
+                        Vinculado a {[authenticator.email && accountLabel(authenticator.email), authenticator.emailAddress && addressLabel(authenticator.emailAddress)].filter(Boolean).join(' e ')}
+                    </p>
                 }
             </div>
             <ModalRoot>
@@ -135,7 +137,7 @@ function Authenticators() {
 
     const term = filters.searchTerm.trim().toLowerCase()
     const visible = authenticators.filter(e =>
-        !term || [e.issuer, e.accountName, e.email?.platform?.name].some(value => value?.toLowerCase().includes(term))
+        !term || [e.issuer, e.accountName, e.email?.platform?.name, e.emailAddress && addressLabel(e.emailAddress)].some(value => value?.toLowerCase().includes(term))
     )
 
     return (
