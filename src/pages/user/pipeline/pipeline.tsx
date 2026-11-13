@@ -41,13 +41,14 @@ function toList<T>(value: unknown): T[] {
   return (value as { res?: T[] } | null | undefined)?.res ?? []
 }
 
-type StepState = 'found' | 'new' | 'blocked'
+type StepState = 'found' | 'new' | 'blocked' | 'optional'
 
 function StateBadge({ state }: { state: StepState }) {
   const styles: Record<StepState, { label: string, className: string, icon: React.ReactNode }> = {
     found: { label: 'Encontrado', className: 'bg-green-500/15 text-green-400', icon: <CheckCircle2 className='w-3.5 h-3.5' /> },
     new: { label: 'Novo', className: 'bg-main-violet-500/20 text-purple-300', icon: <CircleDashed className='w-3.5 h-3.5' /> },
     blocked: { label: 'Aguardando', className: 'bg-zinc-700/50 text-zinc-400', icon: <CircleDashed className='w-3.5 h-3.5' /> },
+    optional: { label: 'Opcional', className: 'bg-zinc-700/50 text-zinc-300', icon: <CircleDashed className='w-3.5 h-3.5' /> },
   }
   const style = styles[state]
 
@@ -191,11 +192,18 @@ export default function Pipeline() {
   const emailId = pipeline.emailId ?? accountHere?.id ?? null
   const otherAccounts = identities.filter(account => account.id !== emailId)
   const platformName = platforms.find(item => item.id === platformId)?.name ?? match?.platform?.name ?? capture?.platform ?? capture?.domain ?? ''
-  const provider = providers.find(item => item.id === pipeline.providerId)
   const address = addresses.find(item => item.id === pipeline.emailAddressId)
+  // An address picked or created here brings its own domain.
+  const provider = providers.find(item => item.id === (pipeline.providerId ?? address?.provider?.id))
+
+  // Addresses offered for a login without "@": the chosen domain's, or all of them.
+  const addressOptions = addresses
+    .filter(item => !provider || item.provider?.id === provider.id)
+    .map(item => ({ id: item.id, label: `${item.username}@${item.provider?.signature ?? ''}` }))
 
   // The account is created last: it needs the platform and, for an e-mail login, the address.
-  const missingForAccount = isEmail && !provider ? 'o domínio' : isEmail && !address ? 'o endereço' : !platformId ? 'a plataforma' : null
+  // For a user name / id login the domain and address are optional (linked when chosen).
+  const missingForAccount = !platformId ? 'a plataforma' : isEmail && !provider ? 'o domínio' : isEmail && !address ? 'o endereço' : null
   const accountReady = missingForAccount === null
   const accountHint = emailId
     ? `Já cadastrada em ${platformName}`
@@ -303,50 +311,11 @@ export default function Pipeline() {
               </div>
             </If>
 
-            {/* Order follows what each record needs: domain -> address (needs the domain) ->
-                platform -> account (needs the platform and, for an e-mail login, the address). */}
-            <If conditional={isEmail}>
-              <div className='flex flex-col gap-4'>
-                <SectionTitle index='1' title='Pelo e-mail' subtitle={`O domínio sai do @${match?.emailDomain ?? ''} e o endereço da parte antes dele`} />
-                <div className='flex flex-wrap gap-4'>
-                  <StepCard
-                    icon={<Server className='w-4 h-4' />}
-                    title='Domínio'
-                    value={provider ? `${provider.name} (${provider.signature})` : match?.emailDomain ?? null}
-                    hint={provider ? undefined : `Nenhum domínio cadastrado para @${match?.emailDomain ?? ''}`}
-                    state={provider ? 'found' : 'new'}
-                  >
-                    <If conditional={!provider}>
-                      <Picker
-                        placeholder='Escolher domínio existente'
-                        options={providers.map(item => ({ id: item.id, label: `${item.name} (${item.signature})` }))}
-                        onSelect={(id) => dispatch(setPipelineData({ providerId: id, emailAddressId: null }))}
-                      />
-                      <Button type='button' variation='outline' onClick={() => navigate(USER_ROUTES.MANAGER_DOMAINS)}>
-                        Cadastrar {match?.emailDomain}
-                      </Button>
-                    </If>
-                  </StepCard>
-
-                  <StepCard
-                    icon={<Mail className='w-4 h-4' />}
-                    title='Endereço'
-                    value={match?.email ?? null}
-                    hint={address ? undefined : provider ? 'Ainda não cadastrado' : 'Defina o domínio primeiro'}
-                    state={address ? 'found' : provider ? 'new' : 'blocked'}
-                  >
-                    <If conditional={!address && Boolean(provider)}>
-                      <Button type='button' variation='outline' onClick={() => navigate(USER_ROUTES.MANAGER_EMAIL_ADDRESS)}>
-                        Cadastrar endereço
-                      </Button>
-                    </If>
-                  </StepCard>
-                </div>
-              </div>
-            </If>
-
+            {/* Always platform -> domain -> e-mail -> account. With an e-mail login the domain and
+                address come from it and are required; with a user name / id they are optional and
+                come from the account already linked to one, or from what the user picks. */}
             <div className='flex flex-col gap-4'>
-              <SectionTitle index={isEmail ? '2' : '1'} title='Conta na plataforma' subtitle='Plataforma do site + a conta usada no login' />
+              <SectionTitle index='1' title='Plataforma' subtitle='O site onde você fez login' />
               <div className='flex flex-wrap gap-4'>
                 <StepCard
                   icon={<Globe className='w-4 h-4' />}
@@ -366,7 +335,71 @@ export default function Pipeline() {
                     </Button>
                   </If>
                 </StepCard>
+              </div>
+            </div>
 
+            <div className='flex flex-col gap-4'>
+              <SectionTitle
+                index='2'
+                title={isEmail ? 'E-mail' : 'E-mail (opcional)'}
+                subtitle={isEmail
+                  ? `O domínio sai do @${match?.emailDomain ?? ''} e o endereço da parte antes dele`
+                  : 'O login não é um e-mail. Se a conta usa um, escolha para ligar a ela.'}
+              />
+              <div className='flex flex-wrap gap-4'>
+                <StepCard
+                  icon={<Server className='w-4 h-4' />}
+                  title='Domínio'
+                  value={provider ? `${provider.name} (${provider.signature})` : match?.emailDomain ?? null}
+                  hint={provider ? undefined : isEmail ? `Nenhum domínio cadastrado para @${match?.emailDomain ?? ''}` : 'Nenhum e-mail ligado a esta conta'}
+                  state={provider ? 'found' : isEmail ? 'new' : 'optional'}
+                >
+                  <If conditional={!provider}>
+                    <Picker
+                      placeholder='Escolher domínio existente'
+                      options={providers.map(item => ({ id: item.id, label: `${item.name} (${item.signature})` }))}
+                      onSelect={(id) => dispatch(setPipelineData({ providerId: id, emailAddressId: null }))}
+                    />
+                    <Button type='button' variation='outline' onClick={() => navigate(USER_ROUTES.MANAGER_DOMAINS)}>
+                      Cadastrar {isEmail ? match?.emailDomain : 'domínio'}
+                    </Button>
+                  </If>
+                </StepCard>
+
+                <StepCard
+                  icon={<Mail className='w-4 h-4' />}
+                  title='Endereço'
+                  value={address ? `${address.username}@${address.provider?.signature ?? ''}` : match?.email ?? null}
+                  hint={address ? undefined : isEmail ? (provider ? 'Ainda não cadastrado' : 'Defina o domínio primeiro') : 'Escolha um endereço ou deixe em branco'}
+                  state={address ? 'found' : isEmail ? (provider ? 'new' : 'blocked') : 'optional'}
+                >
+                  <If conditional={!address && !isEmail}>
+                    <Picker
+                      placeholder='Escolher endereço existente'
+                      options={addressOptions}
+                      onSelect={(id) => {
+                        const chosen = addresses.find(item => item.id === id)
+                        dispatch(setPipelineData({ emailAddressId: id, providerId: chosen?.provider?.id ?? pipeline.providerId }))
+                      }}
+                    />
+                  </If>
+                  <If conditional={!address && (!isEmail || Boolean(provider))}>
+                    <Button type='button' variation='outline' onClick={() => navigate(USER_ROUTES.MANAGER_EMAIL_ADDRESS)}>
+                      Cadastrar endereço
+                    </Button>
+                  </If>
+                  <If conditional={Boolean(address) && !isEmail && !emailId}>
+                    <Button type='button' variation='text' onClick={() => dispatch(setPipelineData({ emailAddressId: null, providerId: null }))}>
+                      Não ligar e-mail
+                    </Button>
+                  </If>
+                </StepCard>
+              </div>
+            </div>
+
+            <div className='flex flex-col gap-4'>
+              <SectionTitle index='3' title='Conta' subtitle={`A conta usada no login${isEmail ? '' : ', achada pelo nome de usuário'}`} />
+              <div className='flex flex-wrap gap-4'>
                 <StepCard
                   icon={<AtSign className='w-4 h-4' />}
                   title='Conta'
@@ -385,7 +418,7 @@ export default function Pipeline() {
 
             <If conditional={otherAccounts.length > 0}>
               <div className='flex flex-col gap-4'>
-                <SectionTitle index={isEmail ? '3' : '2'} title='Também usado em' subtitle='Outras plataformas com este usuário/e-mail' />
+                <SectionTitle index='4' title='Também usado em' subtitle='Outras plataformas com este usuário/e-mail' />
                 <div className='flex flex-wrap gap-2'>
                   {otherAccounts.map(account => (
                     <Link
